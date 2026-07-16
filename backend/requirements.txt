@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+python-dotenv
+motor
+google-generativeai
+pydantic
+email-validator
+python-docx
+firebase-admin
+pypdf
+reportlab
+chromadb
+gTTS
+requests
