@@ -12,3 +12,4 @@ reportlab
 chromadb
 gTTS
 requests
+python-multipart
