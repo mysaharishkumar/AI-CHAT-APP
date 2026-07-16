@@ -9,90 +9,84 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// =============================
+// Brevo SMTP Configuration
+// =============================
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false,
   auth: {
-    user: process.env.EMAIL_ADDRESS,
-    pass: process.env.EMAIL_PASSWORD,
+    user: process.env.BREVO_SENDER_EMAIL,
+    pass: process.env.BREVO_API_KEY,
   },
 });
 
-// A shared secret so random people on the internet can't use your
-// Gmail account to spam through this endpoint. The Python backend
-// sends this same value in the "x-api-key" header on every request.
 const API_KEY = process.env.EMAIL_SERVICE_API_KEY || "";
 
 function checkApiKey(req, res, next) {
   if (!API_KEY) {
-    // No key configured — allow through (useful for quick local testing),
-    // but you should set EMAIL_SERVICE_API_KEY before deploying.
     return next();
   }
 
   if (req.header("x-api-key") !== API_KEY) {
-    console.warn("[auth] rejected request: invalid or missing x-api-key");
-    return res.status(401).json({ error: "Invalid or missing API key" });
-  }
-
-  return next();
-}
-
-app.get("/health", (req, res) => {
-  res.json({ status: "healthy" });
-});
-
-app.post("/send-otp", checkApiKey, async (req, res) => {
-  const { email, otp } = req.body || {};
-
-  if (!email || !otp) {
-    console.warn("[send-otp] rejected: missing email or otp in request body");
-    return res.status(400).json({ error: "email and otp are required" });
-  }
-
-  if (!process.env.EMAIL_ADDRESS || !process.env.EMAIL_PASSWORD) {
-    console.error(
-      "[send-otp] EMAIL_ADDRESS or EMAIL_PASSWORD is not set on this service"
-    );
-    return res.status(500).json({
-      error: "EMAIL_ADDRESS or EMAIL_PASSWORD is not set on the email service",
+    console.warn("[auth] Invalid API Key");
+    return res.status(401).json({
+      error: "Invalid API Key",
     });
   }
 
-  console.log(`[send-otp] attempting to send OTP email to ${email}`);
+  next();
+}
 
-  const text = `Hello,
+app.get("/health", (req, res) => {
+  res.json({
+    status: "healthy",
+  });
+});
 
-Welcome to AI Chat App.
+app.post("/send-otp", checkApiKey, async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
+    return res.status(400).json({
+      error: "Email and OTP are required",
+    });
+  }
+
+  try {
+    console.log(`Sending OTP to ${email}`);
+
+    const info = await transporter.sendMail({
+      from: `"AI Chat App" <${process.env.BREVO_SENDER_EMAIL}>`,
+      to: email,
+      subject: "AI Chat App - Login Verification",
+      text: `Hello,
 
 Your One-Time Password (OTP) is:
 
 ${otp}
 
-This OTP will expire in 5 minutes.
+This OTP is valid for 5 minutes.
 
-If you did not request this OTP, please ignore this email.
+If you didn't request this OTP, please ignore this email.
 
 Regards,
-AI Chat App Team`;
-
-  try {
-    const info = await transporter.sendMail({
-      from: `"AI Chat App" <${process.env.EMAIL_ADDRESS}>`,
-      to: email,
-      subject: "AI Chat App - Login Verification",
-      text,
+AI Chat App Team`,
     });
 
-    console.log(
-      `[send-otp] sent to ${email} — messageId: ${info.messageId}`
-    );
+    console.log("Email sent:", info.messageId);
 
-    return res.json({ message: "OTP sent" });
-  } catch (err) {
-    console.error(`[send-otp] FAILED for ${email}:`, err.message || err);
+    return res.json({
+      success: true,
+      message: "OTP Sent Successfully",
+    });
+  } catch (error) {
+    console.error(error);
 
     return res.status(500).json({
-      error: err.message || "Failed to send email",
+      success: false,
+      error: error.message,
     });
   }
 });
@@ -101,13 +95,7 @@ const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
   console.log(`Email service running on port ${PORT}`);
-  console.log(
-    `EMAIL_ADDRESS configured: ${Boolean(process.env.EMAIL_ADDRESS)}`
-  );
-  console.log(
-    `EMAIL_PASSWORD configured: ${Boolean(process.env.EMAIL_PASSWORD)}`
-  );
-  console.log(
-    `EMAIL_SERVICE_API_KEY configured: ${Boolean(API_KEY)}`
-  );
+  console.log("BREVO_API_KEY:", !!process.env.BREVO_API_KEY);
+  console.log("BREVO_SENDER_EMAIL:", !!process.env.BREVO_SENDER_EMAIL);
+  console.log("EMAIL_SERVICE_API_KEY:", !!API_KEY);
 });
