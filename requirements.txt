@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-dotenv
+motor
+pymongo
+pydantic
+email-validator
+google-generativeai
+firebase-admin
+python-multipart
