@@ -90,7 +90,7 @@ export default function Login() {
       } else if (error?.code === "ECONNABORTED") {
 
         setErrorMessage(
-          "The server took too long to respond (20s). It may be stuck connecting to the database — check the backend terminal."
+          "The server took too long to respond. If it's been idle (e.g. a free-tier host waking up), please try again in a moment — otherwise check the backend logs."
         );
 
       } else if (error?.message === "Network Error") {

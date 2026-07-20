@@ -8,6 +8,12 @@ const extractError = (error: any): Error => {
     return new Error(detail)
   }
 
+  if (error?.code === "ECONNABORTED") {
+    return new Error(
+      "The server is taking a while to respond — if it's been idle, it may just be waking up. Please try again in a moment."
+    )
+  }
+
   if (error?.message === "Network Error") {
     return new Error(
       "Can't reach the server. Is the backend running?"
