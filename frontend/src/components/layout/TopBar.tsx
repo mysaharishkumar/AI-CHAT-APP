@@ -9,13 +9,14 @@ import {
   FileText,
   FileDown,
   Share2,
+  Menu,
 } from "lucide-react";
 import { exportChat } from "../../services/export";
 import { exportDocx } from "../../services/exportDocx";
 
 type TopBarProps = {
   sidebarOpen: boolean;
-  setSidebarOpen: React.Dispatch<
+  setSidebarOpen: React.Dispatch
     React.SetStateAction<boolean>
   >;
 };
@@ -235,9 +236,34 @@ export default function TopBar({
         className="
           flex
           items-center
-          gap-3
+          gap-2 sm:gap-3
         "
       >
+
+        <button
+          onClick={() =>
+            setSidebarOpen(
+              !sidebarOpen
+            )
+          }
+          aria-label="Toggle sidebar"
+          className="
+            w-10
+            h-10
+            shrink-0
+            rounded-xl
+            flex
+            items-center
+            justify-center
+            text-black
+            dark:text-white
+            hover:bg-gray-200
+            dark:hover:bg-zinc-800
+            transition
+          "
+        >
+          <Menu size={22} />
+        </button>
 
         <button
   onClick={() =>
@@ -246,15 +272,16 @@ export default function TopBar({
     )
   }
   className={`
+  hidden sm:flex
   w-12
   h-12
   rounded-xl
   overflow-hidden
-  flex
   items-center
   justify-center
   transition
   hover:scale-105
+  shrink-0
   ${
     darkMode
       ? "bg-[#030817] shadow-[0_0_25px_rgba(0,255,255,0.7)]"
@@ -278,7 +305,8 @@ export default function TopBar({
   text-black
   dark:text-white
   font-semibold
-  text-2xl
+  text-lg sm:text-2xl
+  truncate
 "
         >
           AI Chat App

@@ -25,10 +25,12 @@ import type {
 
 type SidebarProps = {
   isOpen: boolean;
+  onClose?: () => void;
 };
 
 export default function Sidebar({
   isOpen,
+  onClose,
 }: SidebarProps) {
   const [search, setSearch] =
     useState<string>("");
@@ -106,6 +108,15 @@ const [threadToDelete, setThreadToDelete] =
     };
   }, [loadThreads]);
 
+  const closeOnMobile = (): void => {
+    if (
+      onClose &&
+      window.innerWidth < 768
+    ) {
+      onClose();
+    }
+  };
+
   const handleNewChat =
   async (): Promise<void> => {
 
@@ -123,6 +134,8 @@ const [threadToDelete, setThreadToDelete] =
           "guestNewChat"
         )
       );
+
+      closeOnMobile();
 
       return;
 
@@ -150,6 +163,8 @@ const [threadToDelete, setThreadToDelete] =
           "threadChanged"
         )
       );
+
+      closeOnMobile();
 
       return;
 
@@ -183,6 +198,8 @@ const [threadToDelete, setThreadToDelete] =
           "threadChanged"
         )
       );
+
+      closeOnMobile();
 
     } catch (error) {
 
@@ -301,24 +318,41 @@ const confirmDelete =
     );
 
   return (
-    <div
-      className={`
-        ${
-          isOpen
-            ? "w-72"
-            : "w-0"
-        }
-        overflow-hidden
-        transition-all
-        duration-300
-        bg-white dark:bg-zinc-950
-        border-r
-        border-zinc-300 dark:border-zinc-800
-        h-screen
-        flex
-        flex-col
-      `}
-    >
+    <>
+      {isOpen && (
+        <div
+          className="
+            fixed inset-0
+            bg-black/50
+            z-40
+            md:hidden
+          "
+          onClick={onClose}
+        />
+      )}
+
+      <div
+        className={`
+          fixed md:static
+          inset-y-0 left-0
+          z-50 md:z-auto
+          h-screen
+          w-72
+          ${
+            isOpen
+              ? "translate-x-0 md:w-72"
+              : "-translate-x-full md:translate-x-0 md:w-0"
+          }
+          overflow-hidden
+          transition-all
+          duration-300
+          bg-white dark:bg-zinc-950
+          border-r
+          border-zinc-300 dark:border-zinc-800
+          flex
+          flex-col
+        `}
+      >
       <div className="p-4 border-b border-zinc-300 dark:border-zinc-800">
         <ProfileMenu />
       </div>
@@ -455,6 +489,8 @@ dark:text-white
       "threadChanged"
     )
   );
+
+  closeOnMobile();
 
 }}
             >
@@ -620,6 +656,7 @@ dark:text-white
   }
   onDelete={confirmDelete}
 />
-    </div>
+      </div>
+    </>
   );
 }
