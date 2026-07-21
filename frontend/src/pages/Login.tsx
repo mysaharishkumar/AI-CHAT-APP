@@ -78,22 +78,32 @@ export default function Login() {
 
       setOtpSent(true);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+
+      const err = error as {
+        response?: {
+          data?: {
+            detail?: string;
+          };
+        };
+        code?: string;
+        message?: string;
+      };
 
       const detail =
-        error?.response?.data?.detail;
+        err?.response?.data?.detail;
 
       if (typeof detail === "string") {
 
         setErrorMessage(detail);
 
-      } else if (error?.code === "ECONNABORTED") {
+      } else if (err?.code === "ECONNABORTED") {
 
         setErrorMessage(
           "The server took too long to respond. If it's been idle (e.g. a free-tier host waking up), please try again in a moment — otherwise check the backend logs."
         );
 
-      } else if (error?.message === "Network Error") {
+      } else if (err?.message === "Network Error") {
 
         setErrorMessage(
           "Can't reach the server. Is the backend running?"

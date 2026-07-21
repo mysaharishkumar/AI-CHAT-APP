@@ -17,11 +17,15 @@ export const fetchSpeechAudio = async (
 
     return URL.createObjectURL(response.data)
 
-  } catch (error: any) {
+  } catch (error: unknown) {
 
     // With responseType "blob", axios also puts error bodies
     // into a Blob — unwrap it to get the real backend message.
-    const data = error?.response?.data
+    const err = error as {
+      response?: { data?: unknown }
+    }
+
+    const data = err?.response?.data
 
     if (data instanceof Blob) {
 
@@ -31,18 +35,27 @@ export const fetchSpeechAudio = async (
         const parsed = JSON.parse(text)
 
         throw new Error(
-          parsed.detail || "Voice output failed"
+          parsed.detail || "Voice output failed",
+          { cause: error }
         )
 
-      } catch {
+      } catch (innerError: unknown) {
 
-        throw new Error("Voice output failed")
+        throw new Error("Voice output failed", {
+          cause: innerError,
+        })
 
       }
 
     }
 
-    throw error
+    if (error instanceof Error) {
+      throw error
+    }
+
+    throw new Error("Voice output failed", {
+      cause: error,
+    })
 
   }
 

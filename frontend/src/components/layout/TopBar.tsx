@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import type { Dispatch, SetStateAction } from "react";
+
 import logoDark from "../../assets/logo.png";
 import logoLight from "../../assets/logo-light.png";
 
@@ -16,9 +18,7 @@ import { exportDocx } from "../../services/exportDocx";
 
 type TopBarProps = {
   sidebarOpen: boolean;
-  setSidebarOpen: React.Dispatch
-    React.SetStateAction<boolean>
-  >;
+  setSidebarOpen: Dispatch<SetStateAction<boolean>>;
 };
 
 export default function TopBar({

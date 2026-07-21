@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import type { Dispatch, SetStateAction } from "react";
 
 import TopBar from "./TopBar";
 import ChatInput from "../chat/ChatInput";
@@ -21,9 +22,7 @@ type HistoryItem = {
 
 type Props = {
   sidebarOpen: boolean;
-  setSidebarOpen: React.Dispatch<
-    React.SetStateAction<boolean>
-  >;
+  setSidebarOpen: Dispatch<SetStateAction<boolean>>;
 };
 
 export default function ChatWindow({
