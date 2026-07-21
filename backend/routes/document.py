@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File
+import os
 
 from models.document import DocumentQuery
 from services.rag_service import ingest_pdf, search_documents
@@ -19,6 +20,8 @@ async def upload_document(
     user_id: str,
     file: UploadFile = File(...)
 ):
+
+    os.makedirs("uploads", exist_ok=True)
 
     path = f"uploads/{file.filename}"
 

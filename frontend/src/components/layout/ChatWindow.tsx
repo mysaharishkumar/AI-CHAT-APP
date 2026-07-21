@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Dispatch, SetStateAction } from "react";
+import { uploadDocument, askDocument } from "../../services/document";
 
 import TopBar from "./TopBar";
 import ChatInput from "../chat/ChatInput";
@@ -211,7 +212,31 @@ export default function ChatWindow({
 
         let reply: string;
 
-        if (!userId) {
+        if (file) {
+
+          // Document Q&A requires an account, since documents
+          // are stored per user_id on the backend.
+          if (!userId) {
+
+            throw new Error(
+              "Please sign in to ask questions about documents."
+            );
+
+          }
+
+          await uploadDocument(
+            file,
+            userId
+          );
+
+          reply =
+            await askDocument(
+              userId,
+              text ||
+                "Summarize this document."
+            );
+
+        } else if (!userId) {
 
           // Guest: ephemeral, nothing saved
           reply =

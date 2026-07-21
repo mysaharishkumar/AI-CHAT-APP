@@ -206,18 +206,44 @@ export default function Login() {
 
       navigate("/");
 
-    } catch (error) {
+    } catch (error: unknown) {
 
       console.error(error);
 
-      setErrorMessage(
-        "Google Login Failed"
-      );
+      const err = error as {
+        code?: string;
+        message?: string;
+      };
+
+      if (err?.code === "auth/unauthorized-domain") {
+
+        setErrorMessage(
+          "This site isn't authorized for Google Sign-In yet. (Add this domain in Firebase Console → Authentication → Settings → Authorized domains.)"
+        );
+
+      } else if (err?.code === "auth/popup-closed-by-user") {
+
+        setErrorMessage(
+          "Sign-in popup was closed before finishing."
+        );
+
+      } else if (err?.code === "auth/popup-blocked") {
+
+        setErrorMessage(
+          "Your browser blocked the sign-in popup. Please allow popups for this site and try again."
+        );
+
+      } else {
+
+        setErrorMessage(
+          `Google Login Failed${err?.code ? ` (${err.code})` : ""}`
+        );
+
+      }
 
     }
 
   };
-
   return (
     <div
       className="
