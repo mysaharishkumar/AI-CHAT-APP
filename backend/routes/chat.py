@@ -1,3 +1,4 @@
+from bson import ObjectId
 from fastapi import APIRouter, HTTPException
 from models.message import ChatRequest
 
@@ -6,6 +7,7 @@ from services.memory_service import (
     get_memories,
     save_memory
 )
+from services.rag_service import search_documents
 
 from database.messages import messages
 from database.threads import threads
@@ -53,6 +55,25 @@ async def chat(req: ChatRequest):
         except Exception as e:
             print(f"[chat] get_memories failed: {e}")
             memories = None
+
+        # If this user has ever uploaded a document, pull in any
+        # relevant excerpts for THIS message too — not just the
+        # single message the file was attached to.
+        try:
+            doc_context = search_documents(
+                req.user_id,
+                req.message
+            )
+        except Exception as e:
+            print(f"[chat] search_documents failed: {e}")
+            doc_context = ""
+
+        if doc_context:
+
+            if memories is None:
+                memories = {}
+
+            memories["relevant_document_excerpts"] = doc_context
 
     else:
 
@@ -103,18 +124,18 @@ async def chat(req: ChatRequest):
         )
 
         await threads.update_one(
-    {
-        "_id": __import__("bson").ObjectId(
-            req.thread_id
+            {
+                "_id": ObjectId(
+                    req.thread_id
+                )
+            },
+            {
+                "$set": {
+                    "title": title,
+                    "empty": False
+                }
+            }
         )
-    },
-    {
-        "$set": {
-            "title": title,
-            "empty": False
-        }
-    }
-)
 
     return {
         "reply": ai_response

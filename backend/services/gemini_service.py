@@ -39,6 +39,12 @@ If the user asks:
 
 Answer using the stored name from memory.
 
+If "relevant_document_excerpts" is present above, it is text pulled from
+a document the user uploaded (e.g. a resume). Use it to answer questions
+about that document (e.g. their skills, projects, CGPA, experience) even
+if the user doesn't re-attach the file, and even in a brand new chat.
+If the answer truly isn't in those excerpts, say so rather than guessing.
+
 If the user tells you new information, acknowledge it naturally.
 
 User Message:
